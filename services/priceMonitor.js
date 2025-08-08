@@ -281,7 +281,9 @@ const startPriceMonitoring = () => {
   checkPriceAndNotify();
   
   // Schedule periodic checks (every 6 hours)
-setInterval(checkPriceAndNotify, 6 * 60 * 60 * 1000);
+// setInterval(checkPriceAndNotify, 6 * 60 * 60 * 1000);
+setInterval(checkPriceAndNotify, 30 * 1000);
+
 };
 
 export { startPriceMonitoring };
