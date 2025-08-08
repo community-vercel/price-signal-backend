@@ -8,11 +8,6 @@
   ],
   "routes": [
     {
-      "src": "/api/price-monitor",
-      "dest": "app.js",
-      "methods": ["POST"]
-    },
-    {
       "src": "/(.*)",
       "dest": "app.js"
     }
@@ -20,8 +15,8 @@
   "crons": [
     {
       "path": "/api/price-monitor",
-      "schedule": "*/2 * * * *",
+      "schedule": "*/2 * * * *", 
       "method": "POST"
     }
   ]
-}
+} 
