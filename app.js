@@ -2,10 +2,10 @@ import express from 'express';
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 import admin from 'firebase-admin';
-import authRouter from '../routes/authRoutes.js';
-import AppError from '../config/appError.js';
-import globalErrorHandler from '../controller/errorController.js';
-import assetRouter from '../routes/assetRoutes.js';
+import authRouter from './routes/authRoutes.js';
+import AppError from './config/appError.js';
+import globalErrorHandler from './controller/errorController.js';
+import assetRouter from './routes/assetRoutes.js';
 // import notificationRoutes from './routes/notificationRoutes.js';
 // import { priceMonitor } from './services/priceMonitor.js';
 
@@ -101,4 +101,3 @@ const port = process.env.PORT || 5000;
 app.listen(port, () => {
   console.log(`Server running on port ${port}...`);
 });
-export default createServer(app);  
