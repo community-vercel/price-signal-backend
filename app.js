@@ -20,7 +20,7 @@ const app = express();
 // Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-
+ 
 // Routes
 app.use('/api/v1/auth', authRouter);
 app.use('/api/v1/assets', assetRouter);
