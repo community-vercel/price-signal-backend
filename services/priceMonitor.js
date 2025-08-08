@@ -188,6 +188,11 @@ if (!admin.apps.length) {
 const priceHistory = new Map();
 const COINRANKING_API_URL = 'https://coinranking1.p.rapidapi.com/coins?limit=1000';
 
+// Monitoring control variables
+let isMonitoring = false;
+let monitoringInterval;
+const MONITOR_INTERVAL_MS = 30 * 1000; // 30 seconds
+
 const fetchLatestPrices = async () => {
   try {
     const response = await axios.get(COINRANKING_API_URL, {
@@ -272,4 +277,31 @@ const checkPriceAndNotify = async () => {
   }
 };
 
-export { checkPriceAndNotify };
+const startMonitoring = () => {
+  if (isMonitoring) {
+    console.log('Monitoring is already running');
+    return;
+  }
+
+  console.log('Starting price monitoring service');
+  isMonitoring = true;
+
+  // Initial immediate check
+  checkPriceAndNotify();
+
+  // Set up recurring checks
+  monitoringInterval = setInterval(() => {
+    checkPriceAndNotify();
+  }, MONITOR_INTERVAL_MS);
+};
+
+const stopMonitoring = () => {
+  if (!isMonitoring) return;
+
+  console.log('Stopping price monitoring service');
+  clearInterval(monitoringInterval);
+  isMonitoring = false;
+};
+
+// Export all functions
+export { checkPriceAndNotify, startMonitoring, stopMonitoring };

@@ -10,6 +10,8 @@ import assetRouter from './routes/assetRoutes.js';
 // import { priceMonitor } from './services/priceMonitor.js';
 
 // import { startMonitoring } from './services/priceMonitor.js';
+import { startMonitoring } from './services/priceMonitor.js';
+
 
 dotenv.config();
 
@@ -95,6 +97,8 @@ mongoose
   .catch(err => console.error('MongoDB connection error:', err));
 // startMonitoring();
 // priceMonitor.start();
+startMonitoring();
+
 
 
 const port = process.env.PORT || 5000;
