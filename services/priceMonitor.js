@@ -159,8 +159,7 @@
 
 
 
-
-
+// services/priceMonitor.js
 
 import Asset from './../models/Asset.js';
 import User from './../models/User.js';
@@ -178,10 +177,12 @@ const __dirname = path.dirname(__filename);
 const serviceAccountPath = path.join(__dirname, '../config/firebase-service-account.json');
 const serviceAccount = JSON.parse(readFileSync(serviceAccountPath));
 
-// Initialize Firebase Admin
-admin.initializeApp({
-  credential: admin.credential.cert(serviceAccount)
-});
+// Initialize Firebase Admin (only if not already initialized)
+if (!admin.apps.length) {
+  admin.initializeApp({
+    credential: admin.credential.cert(serviceAccount)
+  });
+}
 
 // Track previous prices (in memory)
 const priceHistory = new Map();
@@ -224,19 +225,14 @@ const updateAssetPrices = async (latestPrices) => {
 
 const checkPriceAndNotify = async () => {
   try {
-    // Step 1: Fetch latest market prices
     const latestPrices = await fetchLatestPrices();
-    
-    // Step 2: Update assets with new prices
     await updateAssetPrices(latestPrices);
-    
-    // Step 3: Check for changes and notify
+
     const assets = await Asset.find({});
-    
     for (const asset of assets) {
       const prevPrice = priceHistory.get(asset.id) || asset.purchasePrice;
       const currentPrice = asset.currentPrice || asset.purchasePrice;
-      
+
       if (currentPrice !== prevPrice) {
         const user = await User.findById(asset.userId);
         if (!user || !user.fcmTokens?.length) continue;
@@ -268,7 +264,7 @@ const checkPriceAndNotify = async () => {
           console.error('FCM Error:', fcmError.message);
         }
       }
-      
+
       priceHistory.set(asset.id, currentPrice);
     }
   } catch (error) {
@@ -276,14 +272,4 @@ const checkPriceAndNotify = async () => {
   }
 };
 
-const startPriceMonitoring = () => {
-  // Initial run
-  checkPriceAndNotify();
-  
-  // Schedule periodic checks (every 6 hours)
-// setInterval(checkPriceAndNotify, 6 * 60 * 60 * 1000);
-setInterval(checkPriceAndNotify, 30 * 1000);
-
-};
-
-export { startPriceMonitoring };
+export { checkPriceAndNotify };
