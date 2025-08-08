@@ -1,8 +1,8 @@
 import Asset from '../models/Asset.js';
-import { startPriceMonitoring } from '../services/priceMonitor.js';
+import { checkPriceAndNotify } from '../services/priceMonitor.js';
 
 
-startPriceMonitoring();
+checkPriceAndNotify();
 
      // Create - Add a new asset
      const addAsset = async (req, res) => {
