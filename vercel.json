@@ -2,21 +2,19 @@
   "version": 2,
   "builds": [
     {
-      "src": "app.js",
+      "src": "api/**/*.js",
       "use": "@vercel/node"
     }
   ],
   "routes": [
-    {
-      "src": "/(.*)",
-      "dest": "app.js"
-    }
+    { "src": "/api/app", "dest": "api/app.js" },
+    { "src": "/api/price-monitor", "dest": "api/price-monitor.js" }
   ],
   "crons": [
     {
       "path": "/api/price-monitor",
-      "schedule": "*/2 * * * *", 
+      "schedule": "0 */6 * * *", 
       "method": "POST"
     }
   ]
-} 
+}
