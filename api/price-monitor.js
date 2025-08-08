@@ -1,4 +1,4 @@
-import { checkPrices } from '../../services/PriceMonitor';
+import { checkPrices } from '../services/priceMonitor.js';
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
