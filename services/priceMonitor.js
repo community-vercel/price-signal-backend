@@ -31,7 +31,7 @@ try {
   }
   if (serviceAccount.project_id !== 'price-signal-app') {
     throw new Error(`Service account project_id does not match expected: price-signal-app`);
-  }
+  } 
   if (!serviceAccount.private_key) {
     throw new Error('FIREBASE_PRIVATE_KEY is not set in .env');
   }
