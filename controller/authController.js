@@ -384,8 +384,9 @@ export const updateUserProfile = async (req, res, next) => {
 // userController.js
 export const updateFcmToken = async (req, res) => {
   try {
-    const { fcmToken } = req.body;
+    const { fcmToken,action  } = req.body;
     console.log('🔔 Received FCM token:', fcmToken);
+    
 
     if (!fcmToken) {
       return res.status(400).json({ error: 'FCM token is required' });
@@ -393,12 +394,22 @@ export const updateFcmToken = async (req, res) => {
 
     // Verify authorization
     const token = req.headers.authorization?.split(' ')[1];
-    if (!token) {
+   if (!token) {
       return res.status(401).json({ error: 'Not authorized' });
     }
 
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
     const userId = decoded.id;
+
+     if (action === 'remove') {
+      // Remove specific FCM token
+      await User.findByIdAndUpdate(
+        userId,
+        { $pull: { fcmTokens: fcmToken } },
+        { new: true }
+      );
+      return res.json({ success: true, message: 'FCM token removed' });
+    }
 
     // Update user document - critical changes here:
     const user = await User.findOneAndUpdate(
@@ -429,3 +440,36 @@ export const updateFcmToken = async (req, res) => {
     });
   }
 };
+
+// export const getFcmTokens = async (req, res) => {
+//   try {
+//     // Verify authorization
+//     const token = req.headers.authorization?.split(' ')[1];
+//     if (!token) {
+//       return res.status(401).json({ error: 'Not authorized' });
+//     }
+
+//     const decoded = jwt.verify(token, process.env.JWT_SECRET);
+//     const userId = decoded.id;
+
+//     // Find user and return their FCM tokens
+//     const user = await User.findById(userId, { fcmTokens: 1 });
+
+//     if (!user) {
+//       return res.status(404).json({ error: 'User not found' });
+//     }
+
+//     console.log('📝 Retrieved user tokens:', user.fcmTokens);
+//     res.json({ 
+//       success: true,
+//       tokens: user.fcmTokens || [] // Return empty array if no tokens
+//     });
+
+//   } catch (error) {
+//     console.error('🚨 FCM retrieval error:', error);
+//     res.status(500).json({ 
+//       error: 'Failed to retrieve FCM tokens',
+//       details: error.message 
+//     });
+//   }
+// };

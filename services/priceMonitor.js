@@ -1,63 +1,39 @@
 import Asset from './../models/Asset.js';
 import User from './../models/User.js';
-import Notification from './../models/Notification.js';
+import Notification from './../models/Notification.js'; // Add this import
 import admin from 'firebase-admin';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import { readFileSync } from 'fs';
 import axios from 'axios';
 import dotenv from 'dotenv';
-
-// Load environment variables
 dotenv.config();
 
-// Construct service account credentials from environment variables
+
+// Paths
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Firebase
+
 const serviceAccount = {
-  type: process.env.FIREBASE_TYPE || 'service_account',
-  project_id: process.env.FIREBASE_PROJECT_ID,
-  private_key_id: process.env.FIREBASE_PRIVATE_KEY_ID,
-  private_key: process.env.FIREBASE_PRIVATE_KEY,
-  client_email: process.env.FIREBASE_CLIENT_EMAIL,
-  client_id: process.env.FIREBASE_CLIENT_ID,
-  auth_uri: process.env.FIREBASE_AUTH_URI,
-  token_uri: process.env.FIREBASE_TOKEN_URI,
-  auth_provider_x509_cert_url: process.env.FIREBASE_AUTH_PROVIDER_X509_CERT_URL,
-  client_x509_cert_url: process.env.FIREBASE_CLIENT_X509_CERT_URL,
-  universe_domain: process.env.FIREBASE_UNIVERSE_DOMAIN,
+  projectId:'price-signal-app',
+  privateKey:"-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQDcBxEvuhsW1PEd\nPHaRrwzMUstmOhOSHUWnmBlz/GmU3FCchAMBDEF0Rb4EALzkILDJ6DHE4B8PecSd\nieR5JnuXBlQ43WX3EC49ylfsuVlSzYtBFsd9BMKdTcs5uZnr4tlko2sr15DcMF48\nDRZ/t9lx+XvNXUVQswcNdV7rK4dOyxZcf147F/zyvdNMAd1wi5Isg2ta4tDjzoIn\nw9TZ391jh+k7hhAbUwKxIdp8+g+QORFyhQngFhFwIPLtqVae4Ct9r/oJku8RLKTv\nz12T5r5wBAsChaFYimJcpL11AfCyxRgcG5nZlc9tOFopuuiaH+u+o1FmOgOu8vLD\n6j0p+MLbAgMBAAECggEAXZ10JoZceD5pyDKtkBaWr2iauggDw6tIs6H3Um4Wzgtf\nEPjp/kwknT//NNzLgZSXI5Dze/yPupnomc7Nsu44r2018GvislfkFM4+0q2Z360s\njqkOf5bC5wLucMUTRFXkgPk25BR3wfeiYJKA/B5RGjk3/4yrrUY+ve8uT4jZrR/Z\nkNY6fsMSj7onV4TJPN3LHdmpxWoUxOZFX5+D9idzBD9hcrQdAzQFvpnyen1EtDak\nHXL2P2RP0bYlyGcasBV1wngmIDD7xp38xnCmfI54XdY7s6P3fd6BZ/soFg0cGOsH\nbT+VQepsfb7mVzi3ArPtkPpCjqnd6BOrtKUTY7nkoQKBgQDvE/cxRJ1ULIflq4fe\nHMfJ+PDciDoVFUqxh/GZuMDHZoF+bTbBg8k0i5/kTpfjyViAOSqj8EesHI84Lnii\nBevamrW61JIBY0hPQaeT26i1UxzMKABFZRa6aTpiKzdGYiaI50MgyidLN+O9xej9\nCcsVKD15Fcu41kitm3ofo4XWHwKBgQDrmenLAw+ZEU3FNzBcE2WyR9+bgEC2YYc1\nmMMazBydWq9UftzEz7dCpXSVmBzq8jeP+X/SgbjiDs3/XBoXky/5jwKKfLuhoOAn\nXjHzrwQTy/DQ9aA/sZaM03X164xJ+GrZdXz4spjyYKIYyjbHgbA9oCGUg5U20Gyv\nzOEA1jNjxQKBgQDu36sHfgAYX1n1HzrksSrp4aJ/JlmqQRjdYvAB4Lg1Q3U1Jdgk\n6BD8QFmkmuZmQQH9M6EoJebmz65FuyDq+jGavSPApa2wV0ujbP0L3dimO4G1dm42\n5/cakBM2jOlwmJbaCP9oXrN+Ezyom3rcgJF59TfeqOlhKDF7zLHrtM3/jwKBgFXu\n7bd+hlHuXc9xMdJjwNQmIwk03mWnbQm/jmpXyJgcW5cWLrAak11bvApUUTfg4SNC\nfbzqU+UgQULC9UFkDjuYTfT1SfrKEvhJAy8+xt3xpQSSksCopaD4AC6Sm7jfQxnO\nIKcVfXPqizU/jHt4cjAIGDdzRxmXLA1zTR5hAp2BAoGACjlRmX8e7NIPmuR0orBE\n7WPS5b8eeP2lMBsIOQqbl+P5PNiFiXPMW+Uq0GtJVC/wKRrPRZcOEY5kspJtAQb1\n8UNQbnaT8BtSUuaRsePun5CbIQ3jFZf1hEWiBLh+UQO2WNYSzj1SDjhaq2/kDEBn\nrgKu3KcUOwn4ed+xKZXs6jI=\n-----END PRIVATE KEY-----\n",
+  clientEmail:'firebase-adminsdk-fbsvc@price-signal-app.iam.gserviceaccount.com' ,
+  clientId:'103045196354658690529' ,
 };
 
-// Validate service account credentials
-try {
-  console.log('🕒 Server time (UTC):', new Date().toUTCString());
-  if (!serviceAccount.project_id) {
-    throw new Error('FIREBASE_PROJECT_ID is not set in .env');
-  }
-  if (serviceAccount.project_id !== 'price-signal-app') {
-    throw new Error(`Service account project_id does not match expected: price-signal-app`);
-  } 
-  if (!serviceAccount.private_key) {
-    throw new Error('FIREBASE_PRIVATE_KEY is not set in .env');
-  }
-  if (!serviceAccount.client_email) {
-    throw new Error('FIREBASE_CLIENT_EMAIL is not set in .env');
-  }
-} catch (error) {
-  console.error('🚨 Failed to load Firebase service account credentials:', {
-    message: error.message,
-    stack: error.stack,
-  });
-  throw error;
-}
-
-// Initialize Firebase Admin SDK
 if (!admin.apps.length) {
   try {
     admin.initializeApp({
-      credential: admin.credential.cert(serviceAccount),
+      credential: admin.credential.cert(serviceAccount)
     });
-    console.log('✅ Firebase Admin SDK initialized for project:', serviceAccount.project_id);
+    console.log('✅ Firebase Admin SDK initialized for project:', serviceAccount.projectId);
   } catch (error) {
     console.error('🚨 Firebase Admin SDK initialization failed:', {
       code: error.code,
       message: error.message,
-      stack: error.stack,
+      stack: error.stack
     });
     throw error;
   }
@@ -72,9 +48,9 @@ const fetchLatestPrices = async () => {
   try {
     const response = await axios.get(COINRANKING_API_URL, {
       headers: {
-        'X-RapidAPI-Key': process.env.RAPIDAPI_KEY || 'db6f4c8bdbmsh7c06f5ac4f1e1ebp1e8908jsn4f501d04c53c',
-        'X-RapidAPI-Host': 'coinranking1.p.rapidapi.com',
-      },
+        'X-RapidAPI-Key': 'db6f4c8bdbmsh7c06f5ac4f1e1ebp1e8908jsn4f501d04c53c',
+        'X-RapidAPI-Host': 'coinranking1.p.rapidapi.com'
+      }
     });
     return response.data.data.coins.reduce((map, coin) => {
       map[coin.symbol] = parseFloat(coin.price);
@@ -99,7 +75,7 @@ const updateAssetPrices = async (latestPrices) => {
 
     const prevPrice = asset.currentPrice ?? asset.purchasePrice;
     const priceChanged = newPrice !== asset.currentPrice;
-
+    
     if (!priceChanged) {
       return; // Skip if price hasn't changed
     }
@@ -108,28 +84,18 @@ const updateAssetPrices = async (latestPrices) => {
     const priceDifference = newPrice - prevPrice;
     const changePercent = Math.abs(priceDifference / prevPrice) * 100;
     const direction = priceDifference >= 0 ? '↑' : '↓';
-
+    
     // Calculate value and amount changes
     const currentValue = asset.amount * prevPrice;
     const newAmount = currentValue / newPrice;
     const amountDifference = newAmount - asset.amount;
-    const valueDifference = newAmount * newPrice - currentValue;
+    const valueDifference = (newAmount * newPrice) - currentValue;
 
     // Detailed logging
     console.log(`\n🔔 ${asset.name || asset.symbol} (${asset.symbol})`);
-    console.log(
-      `💰 Price: $${prevPrice.toFixed(2)} → $${newPrice.toFixed(2)} (${direction} ${changePercent.toFixed(2)}%)`,
-    );
-    console.log(
-      `📊 Amount: ${asset.amount.toFixed(8)} → ${newAmount.toFixed(8)} (${
-        amountDifference >= 0 ? '+' : ''
-      }${amountDifference.toFixed(8)})`,
-    );
-    console.log(
-      `💵 Value: $${currentValue.toFixed(2)} → $${(newAmount * newPrice).toFixed(2)} (${
-        valueDifference >= 0 ? '+' : ''
-      }${valueDifference.toFixed(2)})`,
-    );
+    console.log(`💰 Price: $${prevPrice.toFixed(2)} → $${newPrice.toFixed(2)} (${direction} ${changePercent.toFixed(2)}%)`);
+    console.log(`📊 Amount: ${asset.amount.toFixed(8)} → ${newAmount.toFixed(8)} (${amountDifference >= 0 ? '+' : ''}${amountDifference.toFixed(8)})`);
+    console.log(`💵 Value: $${currentValue.toFixed(2)} → $${(newAmount * newPrice).toFixed(2)} (${valueDifference >= 0 ? '+' : ''}${valueDifference.toFixed(2)})`);
 
     // Update asset in database
     const updateData = {
@@ -140,12 +106,15 @@ const updateAssetPrices = async (latestPrices) => {
         priceHistory: {
           price: newPrice,
           timestamp: new Date(),
-          changePercent: parseFloat(changePercent.toFixed(4)),
-        },
-      },
+          changePercent: parseFloat(changePercent.toFixed(4))
+        }
+      }
     };
 
-    await Asset.updateOne({ _id: asset._id }, { $set: updateData });
+    await Asset.updateOne(
+      { _id: asset._id },
+      { $set: updateData }
+    );
 
     recentlyUpdated.add(String(asset._id));
 
@@ -153,7 +122,7 @@ const updateAssetPrices = async (latestPrices) => {
     if (changePercent >= asset.priceChangeThreshold) {
       await sendPriceNotification(asset, prevPrice, newPrice);
       priceHistory.set(asset._id, newPrice);
-
+      
       // Additional check for significant thresholds
       if (changePercent >= asset.priceChangeThreshold * 2) {
         console.log(`🚨 Significant price change for ${asset.symbol}!`);
@@ -173,23 +142,26 @@ const updateAssetPrices = async (latestPrices) => {
 const trackDailyHighLow = async (asset, newPrice) => {
   const today = new Date().toISOString().split('T')[0];
   const update = {};
-
+  
   if (!asset.dailyHigh || newPrice > asset.dailyHigh.price) {
     update.dailyHigh = {
       price: newPrice,
-      timestamp: new Date(),
+      timestamp: new Date()
     };
   }
-
+  
   if (!asset.dailyLow || newPrice < asset.dailyLow.price) {
     update.dailyLow = {
       price: newPrice,
-      timestamp: new Date(),
+      timestamp: new Date()
     };
   }
 
   if (Object.keys(update).length > 0) {
-    await Asset.updateOne({ _id: asset._id }, { $set: update });
+    await Asset.updateOne(
+      { _id: asset._id },
+      { $set: update }
+    );
   }
 };
 
@@ -197,24 +169,21 @@ const trackDailyHighLow = async (asset, newPrice) => {
 const sendUrgentPriceAlert = async (asset, prevPrice, newPrice) => {
   const changePercent = Math.abs((newPrice - prevPrice) / prevPrice) * 100;
   const direction = newPrice > prevPrice ? 'increased' : 'decreased';
-
+  
   const notification = {
     userId: asset.userId,
     type: 'urgent_price_alert',
-    message: `URGENT: ${asset.symbol} price ${direction} by ${changePercent.toFixed(2)}% ($${prevPrice.toFixed(
-      2,
-    )} → $${newPrice.toFixed(2)})`,
+    message: `URGENT: ${asset.symbol} price ${direction} by ${changePercent.toFixed(2)}% ($${prevPrice.toFixed(2)} → $${newPrice.toFixed(2)})`,
     assetName: asset.name || asset.symbol,
     symbol: asset.symbol,
     prevPrice,
     currentPrice: newPrice,
-    timestamp: new Date(),
+    timestamp: new Date()
   };
 
   await Notification.create(notification);
   console.log(`🚨 Sent urgent alert for ${asset.symbol}`);
 };
-
 const watchAssetChanges = () => {
   Asset.watch().on('change', async (change) => {
     if (change.operationType === 'update' && change.updateDescription.updatedFields.currentPrice) {
@@ -240,12 +209,13 @@ const watchAssetChanges = () => {
 };
 
 const sendPriceNotification = async (asset, prevPrice, currentPrice) => {
+  
   const user = await User.findOne({ _id: asset.userId });
   if (!user || !user.fcmTokens?.length) {
     console.log('🔔 No user or FCM tokens found for userId:', asset.userId);
     return;
   }
-
+  
   const isIncrease = currentPrice > prevPrice;
   const title = `${asset.symbol} Price ${isIncrease ? 'Up' : 'Down'}`;
   const body = `${asset.name}: $${prevPrice.toFixed(2)} → $${currentPrice.toFixed(2)}`;
@@ -257,12 +227,12 @@ const sendPriceNotification = async (asset, prevPrice, currentPrice) => {
       title,
       body,
       assetId: String(asset._id),
-      assetName: asset.name || asset.symbol,
+      assetName: asset.name || asset.symbol, // ✅ FIX
       symbol: asset.symbol,
       prevPrice,
       currentPrice,
       changePercent: Math.abs((currentPrice - prevPrice) / prevPrice) * 100,
-      isIncrease,
+      isIncrease
     });
     console.log('📝 Notification saved to database');
   } catch (error) {
@@ -273,24 +243,24 @@ const sendPriceNotification = async (asset, prevPrice, currentPrice) => {
     notification: { title, body },
     data: {
       assetId: String(asset._id),
-      notificationType: 'price_alert',
+      notificationType: 'price_alert'
     },
     android: {
       priority: 'high',
       notification: {
         channelId: 'price_alerts',
-        sound: 'default',
-      },
+        sound: 'default'
+      }
     },
     apns: {
       payload: {
         aps: {
           sound: 'default',
-          category: 'PRICE_ALERT',
-        },
-      },
+          category: 'PRICE_ALERT'
+        }
+      }
     },
-    tokens: user.fcmTokens,
+    tokens: user.fcmTokens
   };
 
   try {
@@ -303,19 +273,18 @@ const sendPriceNotification = async (asset, prevPrice, currentPrice) => {
           console.error(`🚨 FCM error for token ${user.fcmTokens[idx]}:`, {
             code: resp.error.code,
             message: resp.error.message,
-            details: resp.error.details,
+            details: resp.error.details
           });
-          if (
-            ['messaging/registration-token-not-registered', 'messaging/invalid-registration-token'].includes(
-              resp.error.code,
-            )
-          ) {
+          if (['messaging/registration-token-not-registered', 'messaging/invalid-registration-token'].includes(resp.error.code)) {
             invalidTokens.push(user.fcmTokens[idx]);
           }
         }
       });
       if (invalidTokens.length > 0) {
-        await User.updateOne({ _id: asset.userId }, { $pull: { fcmTokens: { $in: invalidTokens } } });
+        await User.updateOne(
+          { _id: asset.userId },
+          { $pull: { fcmTokens: { $in: invalidTokens } } }
+        );
         console.log('🗑️ Removed invalid FCM tokens:', invalidTokens);
       }
     }
@@ -324,7 +293,7 @@ const sendPriceNotification = async (asset, prevPrice, currentPrice) => {
       code: error.code,
       message: error.message,
       details: error.details,
-      stack: error.stack,
+      stack: error.stack
     });
   }
 };
@@ -337,10 +306,10 @@ const getRecentNotifications = async (userId, days = 10, limitPerDay = 20) => {
 
     const notifications = await Notification.find({
       userId,
-      timestamp: { $gte: dateThreshold },
+      timestamp: { $gte: dateThreshold } // Changed from createdAt to timestamp
     })
-      .sort({ timestamp: -1 })
-      .limit(100);
+    .sort({ timestamp: -1 }) // Changed from createdAt to timestamp
+    .limit(100);
 
     // Group by day
     const groupedByDay = notifications.reduce((acc, notification) => {
@@ -349,27 +318,28 @@ const getRecentNotifications = async (userId, days = 10, limitPerDay = 20) => {
         acc[dateStr] = [];
       }
       // Map to the expected frontend format
-      acc[dateStr].push({
-        title: `${notification.assetName || notification.symbol} Price Update`,
-        body: notification.message || notification.body,
-        assetId: notification.assetId,
-        assetName: notification.assetName || notification.symbol,
-        symbol: notification.symbol,
-        prevPrice: notification.prevPrice || 0,
-        currentPrice: notification.currentPrice || 0,
-        timestamp: notification.timestamp,
-      });
-
+     acc[dateStr].push({
+  title: `${notification.assetName || notification.symbol} Price Update`,
+  body: notification.message || notification.body,
+  assetId: notification.assetId,
+  assetName: notification.assetName || notification.symbol, // ✅ FIX
+  symbol: notification.symbol,
+  prevPrice: notification.prevPrice || 0,
+  currentPrice: notification.currentPrice || 0,
+  timestamp: notification.timestamp
+});
+      
       return acc;
+
     }, {});
 
     // Format the response
     return Object.entries(groupedByDay)
-      .sort((a, b) => new Date(b[0]) - new Date(a[0]))
-      .slice(0, days)
+      .sort((a, b) => new Date(b[0]) - new Date(a[0])) // Sort by date descending
+      .slice(0, days) // Only requested days
       .map(([date, dayNotifications]) => ({
         date,
-        notifications: dayNotifications.slice(0, limitPerDay),
+        notifications: dayNotifications.slice(0, limitPerDay) // Limit per day
       }));
   } catch (error) {
     console.error('Error fetching notifications:', error);
@@ -388,8 +358,8 @@ const checkPriceAndUpdate = async () => {
 
 const startPriceMonitoring = () => {
   checkPriceAndUpdate(); // Initial run
-  watchAssetChanges(); // Listen for DB changes & send notifications
-  setInterval(checkPriceAndUpdate, 30 * 1000); // Poll every 30s
+  watchAssetChanges();   // Listen for DB changes & send notifications
+  setInterval(checkPriceAndUpdate, 10 * 1000); // Poll every 30s
 };
 
 // Export the new function along with the existing one
