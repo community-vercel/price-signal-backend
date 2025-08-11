@@ -6,13 +6,13 @@ const assetSchema = new mongoose.Schema({
   name: { type: String, required: true },
   amount: { type: Number, required: true },
   purchasePrice: { type: Number, required: true },
-    currentPrice: { type: Number, required: false }, // Added currentPrice field
-  userId: { type: String, required: true }, // Added userId field
+    currentPrice: { type: Number, required: false },
+  userId: { type: String, required: true }, 
   date: { type: Date, required: true },
   exchange: { type: String, required: true },
   notes: { type: String, default: '' },
-  lastApiPriceUpdate: { type: Date }, // Track when we last got API price
-  priceChangeThreshold: { type: Number, default: 1 } // % change needed for alerts
+  lastApiPriceUpdate: { type: Date }, 
+  priceChangeThreshold: { type: Number, default: 1 } 
 
 
 }, { timestamps: true });
