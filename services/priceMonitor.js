@@ -48,7 +48,7 @@ const fetchLatestPrices = async () => {
   try {
     const response = await axios.get(COINRANKING_API_URL, {
       headers: {
-        'X-RapidAPI-Key': 'db6f4c8bdbmsh7c06f5ac4f1e1ebp1e8908jsn4f501d04c53c',
+        'X-RapidAPI-Key': 'db347bb45bmshc0b224e1b2c0cc9p1f7221jsnfae5d177ebc9',
         'X-RapidAPI-Host': 'coinranking1.p.rapidapi.com'
       }
     });
