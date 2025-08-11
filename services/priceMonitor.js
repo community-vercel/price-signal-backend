@@ -359,7 +359,7 @@ const checkPriceAndUpdate = async () => {
 const startPriceMonitoring = () => {
   checkPriceAndUpdate(); // Initial run
   watchAssetChanges();   // Listen for DB changes & send notifications
-  setInterval(checkPriceAndUpdate, 10 * 1000); // Poll every 30s
+  setInterval(checkPriceAndUpdate, 3600 * 1000); // Poll every 30s
 };
 
 // Export the new function along with the existing one
