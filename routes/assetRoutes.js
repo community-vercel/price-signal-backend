@@ -6,8 +6,10 @@ import {
   updateAsset,
   deleteAsset
 } from './../controller/assetController.js';
+import { protect } from '../middlewares/authMiddleware.js'; // Import middleware
 
 const router = express.Router();
+router.use(protect);
 
 router.post('/add-asset', addAsset);
 router.get('/get-all-assets', getAllAssets);
