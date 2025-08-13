@@ -25,8 +25,6 @@ router.patch('/update/:id', updateUserProfile);
 router.put('/update-fcm-token', updateFcmToken);
 router.get('/verify-token',verifyToken)
 // router.get('/get-fcm-token', getFcmTokens)
-/auth/verify-token
-
 
 
 export default router;
