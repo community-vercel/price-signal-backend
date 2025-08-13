@@ -23,7 +23,6 @@ router.get('/get/:id', getUserDetails);
 router.patch('/update/:id', updateUserProfile);
 router.put('/update-fcm-token', updateFcmToken);
 // router.get('/get-fcm-token', getFcmTokens)
-/auth/verify-token
 
 
 
