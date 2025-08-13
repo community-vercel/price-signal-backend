@@ -441,7 +441,66 @@ export const updateFcmToken = async (req, res) => {
   }
 };
 
+
+
+
+
+
+export const verifyToken = async (req, res, next) => {
+  try {
+    // 1) Get token from Authorization header
+    let token;
+    if (
+      req.headers.authorization &&
+      req.headers.authorization.startsWith('Bearer')
+    ) {
+      token = req.headers.authorization.split(' ')[1];
+    }
+
+    if (!token) {
+      return next(new AppError('No token provided', 401));
+    }
+
+    // 2) Verify token
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+    // 3) Check if user exists
+    const user = await User.findById(decoded.id).select('-password -__v');
+    if (!user) {
+      return next(new AppError('User associated with this token no longer exists', 401));
+    }
+
+    // 4) Check if user is verified
+    if (!user.isVerified) {
+      return next(new AppError('Please verify your email first', 401));
+    }
+
+    // 5) Token is valid, return user data
+    res.status(200).json({
+      status: 'success',
+      data: {
+        userId: user._id,
+        username: user.username
+      }
+    });
+  } catch (err) {
+    if (err.name === 'JsonWebTokenError') {
+      return next(new AppError('Invalid token', 401));
+    }
+    if (err.name === 'TokenExpiredError') {
+      return next(new AppError('Token has expired', 401));
+    }
+    next(err);
+  }
+};
+
+
 // export const getFcmTokens = async (req, res) => {
+
+
+
+
+
 //   try {
 //     // Verify authorization
 //     const token = req.headers.authorization?.split(' ')[1];
