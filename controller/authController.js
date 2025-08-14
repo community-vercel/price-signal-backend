@@ -477,3 +477,51 @@ export const updateFcmToken = async (req, res) => {
 //     });
 //   }
 // };
+
+
+
+// Add this new controller function
+export const resendVerificationEmail = async (req, res, next) => {
+  try {
+    const { email } = req.body;
+
+    // 1) Find user by email
+    const user = await User.findOne({ email });
+    if (!user) {
+      return next(new AppError('No user found with this email', 404));
+    }
+
+    // 2) Check if already verified
+    if (user.isVerified) {
+      return next(new AppError('Email is already verified', 400));
+    }
+
+    // 3) Generate new verification code
+    const verificationCode = user.createVerificationCode();
+    await user.save({ validateBeforeSave: false });
+
+    // 4) Send verification email
+    const message = `Your new verification code is: ${verificationCode}\nThis code will expire in 10 minutes.`;
+    
+    try {
+      await sendEmail({
+        email: user.email,
+        subject: 'Your new verification code',
+        message
+      });
+
+      res.status(200).json({
+        status: 'success',
+        message: 'New verification code sent to email!'
+      });
+    } catch (err) {
+      user.verificationCode = undefined;
+      user.verificationCodeExpires = undefined;
+      await user.save({ validateBeforeSave: false });
+
+      return next(new AppError('There was an error sending the email. Try again later!', 500));
+    }
+  } catch (err) {
+    next(err);
+  }
+};

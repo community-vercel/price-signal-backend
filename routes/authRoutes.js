@@ -9,6 +9,7 @@ import {
   getUserDetails,
   updateUserProfile,
   updateFcmToken,
+  resendVerificationEmail,
 } from './../controller/authController.js';
 
 const router = express.Router();
@@ -22,6 +23,7 @@ router.patch('/reset-password', resetPassword);
 router.get('/get/:id', getUserDetails);
 router.patch('/update/:id', updateUserProfile);
 router.put('/update-fcm-token', updateFcmToken);
+router.post('/resent-verification',resendVerificationEmail)
 // router.get('/get-fcm-token', getFcmTokens)
 
 
