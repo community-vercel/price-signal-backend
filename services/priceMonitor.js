@@ -359,7 +359,7 @@ const checkPriceAndUpdate = async () => {
 const startPriceMonitoring = () => {
   checkPriceAndUpdate();
   watchAssetChanges();
-  setInterval(checkPriceAndUpdate, 10800 * 1000); // Poll every 3hrs
+  setInterval(checkPriceAndUpdate, 10 * 1000); // Poll every 3hrs
 };
 
 export { startPriceMonitoring, getRecentNotifications };
